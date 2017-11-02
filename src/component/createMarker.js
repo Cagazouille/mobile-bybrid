@@ -1,49 +1,56 @@
-import React, { Component } from 'react';
-import { View, Text, TextInput } from 'react-native';
-import firebase from '../firebase';
-
+import React, { Component } from "react";
+import { View, Text, TextInput } from "react-native";
+import firebase from "../firebase";
 
 class createMarker extends Component {
+  constructor(props) {
+    super(props);
+    this.isObject = this.isObject.bind(this);
+  }
 
-  static callDb(){
-    var ref = firebase.app().database().ref();
+  isObject(a) {
+    return !!a && a.constructor === Object;
+  }
 
-    var UCRef = firebase.database().ref("numberofusers");
-    var uc =    UCRef.on('value', snapshot => {
-      this.setState({usercount: snapshot.val()});
-    });
-    debugger;
+  static callDb(event, emaill) {
+    var id;
+    var i = 0;
+    var email = "";
+    email = emaill;
 
-    console.log('---------------');
-    console.log(uc);
-    console.log('---------------');
-
-    var data = {
-      content: {
-          people: [
-            {
-              name: "Test",
-              age : 24
-            },
-            {
-              name: "Foo",
-              age: 25
-            }
-          ]
-       }
+    while (email[i] && email[i] !== "@") {
+      i++;
     }
-    console.log(data);
+    email = email.substring(0, i);
 
-    //ref.push(data);
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        id = user.uid;
+        //   User is signed in.
+      } else {
+        // No user is signed in.
+      }
+    });
 
+    var ref = firebase
+      .app()
+      .database()
+      .ref(email + "/marker/-KxNEB0AC0qTQa6nZBDu/");
+    var newMarker = {
+      content: {
+        position: [
+          {
+            longitude: event.coordinate.longitude,
+            latitude: event.coordinate.latitude
+          }
+        ]
+      }
+    };
+     ref.push(newMarker);
   }
 
   render() {
-      return (
-            <View>
-              {this.callDb()}
-            </View>
-      );
+    return <View>{this.callDb()}</View>;
   }
 }
 
